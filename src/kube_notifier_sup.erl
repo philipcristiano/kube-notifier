@@ -11,7 +11,7 @@ init([]) ->
     AppSlackChannel = application:get_env(kube_notifier, slack_channel, "#general"),
     SlackChannel = os:getenv("SLACK_CHANNEL", AppSlackChannel),
 
-    AppSlackToken = application:get_env(slack_token, undefined),
+    AppSlackToken = application:get_env(kube_notifier, slack_token, undefined),
     SlackToken = os:getenv("SLACK_TOKEN", AppSlackToken),
 
     Options = [{slack_channel, SlackChannel}, {slack_token, SlackToken}],
