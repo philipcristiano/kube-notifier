@@ -14,3 +14,10 @@ dep_slacker = git https://github.com/julienXX/slacker.git v0.4
 
 
 include erlang.mk
+
+docker_image:
+	docker build . -t kube-notifier:build -f Dockerfile.build
+
+docker_release: docker_image
+	docker run --name build kube-notifier:build
+	docker cp build:/kube-notifier/_rel docker_rel

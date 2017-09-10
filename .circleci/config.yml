@@ -13,3 +13,7 @@ jobs:
             make docker_release
             ls -lah
             find docker_rel
+      - run:
+          name: Create Image
+          command: |
+            docker build --name app -f Dockerfile.assemble

@@ -1,0 +1,3 @@
+from debian:jessie
+
+COPY docker_rel /kube-notifier
