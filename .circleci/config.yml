@@ -19,3 +19,12 @@ jobs:
           name: Create Image
           command: |
             docker build . -f Dockerfile.assemble -t kube-notifier:latest
+
+      - run:
+          name: Push Image
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS quay.io
+            TAG=quay.io/philipcristiano/kube-notifier:build_$CIRCLE_BUILD_NUM
+            docker tag kube-notifier:latest $TAG
+            docker push $TAG
+            echo $TAG
