@@ -10,7 +10,9 @@ jobs:
       - run:
           name: Build Release
           command: |
-            make docker_release
+            docker build . -t kube-notifier:build -f Dockerfile.build
+            docker run --name build kube-notifier:build
+            docker cp build:/kube-notifier/_rel docker_rel
             ls -lah
             find docker_rel
       - run:
