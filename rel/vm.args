@@ -1,0 +1,3 @@
+-name kube_notifier@127.0.0.1
+-setcookie kube_notifier
+-heart

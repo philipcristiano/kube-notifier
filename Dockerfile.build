@@ -1,0 +1,8 @@
+from erlang:19
+
+
+COPY . /kube-notifier
+
+WORKDIR /kube-notifier
+
+RUN make deps app rel

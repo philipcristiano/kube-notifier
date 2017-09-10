@@ -1,0 +1,15 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/kube-notifier
+    docker:
+      - image: docker:17.07.0-ce-git
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Release
+          command: |
+            make docker_release
+            ls -lah
+            find docker_rel
