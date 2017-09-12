@@ -10,6 +10,7 @@ jobs:
       - run:
           name: Build Release
           command: |
+            rm -rf deps
             docker build . -t kube-notifier:build -f Dockerfile.build
             docker run --name build kube-notifier:build
             docker cp build:/kube-notifier/_rel docker_rel
