@@ -4,8 +4,8 @@ apiVersion: v1
 metadata:
   name: kube-notifier-config
 data:
-  config.config: |
-    [{kube_notifier, [{slack_token, "TOKEN"}]}].
+  slack_token: TOKEN
+  slack_channel: "#general"
 ---
 apiVersion: apps/v1beta1 # for versions before 1.6.0 use extensions/v1beta1
 kind: Deployment

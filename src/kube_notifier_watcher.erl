@@ -5,7 +5,7 @@
 -compile({parse_transform, lager_transform}).
 
 %% API functions
--export([start_link/1]).
+-export([start_link/0]).
 
 %% gen_server callbacks
 -export([init/1,
@@ -32,8 +32,8 @@
 %% @spec start_link() -> {ok, Pid} | ignore | {error, Error}
 %% @end
 %%--------------------------------------------------------------------
-start_link(Options) ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, Options, []).
+start_link() ->
+    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 %%%===================================================================
 %%% gen_server callbacks
@@ -50,10 +50,10 @@ start_link(Options) ->
 %%                     {stop, Reason}
 %% @end
 %%--------------------------------------------------------------------
-init(Options) ->
+init([]) ->
+    SlackToken = application:get_env(kube_notifier, slack_token, undefined),
     S1 = #state{
-        slack_channel = proplists:get_value(slack_channel, Options),
-        slack_token = proplists:get_value(slack_token, Options)
+        slack_token = SlackToken
     },
     lager:info("Kube Watcher starting"),
     init_defined_token(S1).
@@ -178,7 +178,7 @@ handle_swaggerl(Val, State=#state{deployment_info=DI}) ->
 
     DI1 = if
         NewGen > CurrentGen -> NewDI = maps:put({Namespace, Name}, NewGen, DI),
-                               send_new_gen_message(Obj, NewGen, State),
+                               send_new_gen_message(Obj, NewGen),
                                NewDI;
         true -> lager:debug("Not a worthy update"),
                 DI
@@ -206,8 +206,8 @@ get_generation_from_deployment(Deployment) ->
     Generation = maps:get(<<"observedGeneration">>, Status),
     Generation.
 
-send_new_gen_message(Deployment, Gen, #state{slack_token=SlackToken, slack_channel=SlackChannel}) ->
-    lager:debug("Sending slack message ~p", [SlackToken]),
+send_new_gen_message(Deployment, Gen) ->
+    lager:debug("Sending slack message"),
     Metadata = maps:get(<<"metadata">>, Deployment),
     Name = maps:get(<<"name">>, Metadata),
     % Status = maps:get(<<"status">>, Deployment),
@@ -230,5 +230,7 @@ send_new_gen_message(Deployment, Gen, #state{slack_token=SlackToken, slack_chann
 
     Title = << <<"Deployment: ">>/binary, Name/binary, " .Generation ", GenBin/binary, <<" deploying.">>/binary >>,
 
+    SlackToken = application:get_env(kube_notifier, slack_token, undefined),
+    SlackChannel = application:get_env(kube_notifier, slack_channel, "#general"),
     {ok, 200, _Headers, Resp} = slacker_chat:post_message(SlackToken, SlackChannel, Title, []),
     lager:debug("Slack message: 200 OK ~p", [Resp]).
