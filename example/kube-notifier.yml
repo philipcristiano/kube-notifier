@@ -4,10 +4,17 @@ apiVersion: v1
 metadata:
   name: kube-notifier-config
 data:
-  slack_token: TOKEN
   slack_channel: "#general"
 ---
-apiVersion: apps/v1beta1 # for versions before 1.6.0 use extensions/v1beta1
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kube-notifier-secrets
+type: Opaque
+data:
+  slack_token: VE9LRU4= # "TOKEN"
+---
+apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: kube-notifier
@@ -22,12 +29,19 @@ spec:
         - name: config
           configMap:
             name: kube-notifier-config
+        - name: secrets
+          secret:
+            secretName: kube-notifier-secrets
       containers:
         - name: kube-notifier
-          image: quay.io/philipcristiano/kube-notifier:build_17
+          image: quay.io/philipcristiano/kube-notifier:build_35
+
           volumeMounts:
             - name: config
-              mountPath: /kube-notifier-config
+              mountPath: /kube-notifier/config
+              readOnly: true
+            - name: secrets
+              mountPath: /kube-notifier/secrets
               readOnly: true
           command:
             - kube-notifier/bin/kube_notifier_release
