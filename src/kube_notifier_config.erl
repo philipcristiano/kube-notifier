@@ -167,7 +167,10 @@ update_config_for_file(Path) ->
     ok = lager:info("Updating config from file ~p", [Path]),
     Name = filename:basename(Path),
     AName = erlang:list_to_atom(Name),
-    {ok, Data} = file:read_file(Path),
-    ok = lager:info("Setting ~p to ~p", [Name, Data]),
-    ok = application:set_env(kube_notifier, AName, Data, [{persistent, true}] ),
-    ok.
+    case file:read_file(Path) of
+          {ok, Data} -> ok = lager:info("Setting ~p to ~p", [Name, Data]),
+                        ok = application:set_env(kube_notifier, AName, Data, [{persistent, true}] ),
+                        ok;
+          {error, Error} -> lager:info("Not update file because ~p", [Error]),
+                            ok
+    end.
