@@ -43,10 +43,17 @@ start_link(ConfigDirs) ->
 
 read_config_dirs([]) ->
     ok;
-read_config_dirs([H|T]) ->
-    {ok, Filenames} = file:list_dir(H),
+read_config_dirs([Path|T]) ->
+    KubeDataPath = filename:join(Path, "..data"),
+    ConfigPath = case filelib:is_dir(KubeDataPath) of
+        true -> lager:info("Kube path ~p detected, using it instead of ~p", [KubeDataPath, Path]),
+                KubeDataPath;
+        _ -> lager:info("Using Config path of ~p", [Path]),
+             Path
+    end,
+    {ok, Filenames} = file:list_dir(ConfigPath),
     ok = lager:info("Filenames for config ~p", [Filenames]),
-    ok = update_config_for_files(H, Filenames),
+    ok = update_config_for_files(ConfigPath, Filenames),
 
     read_config_dirs(T).
 
